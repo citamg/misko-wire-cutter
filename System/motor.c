@@ -29,7 +29,7 @@ typedef struct{
 
 motorGroupHandle motorGroup;
 
-float gear_circ;
+float gear_circ = 22.8;
 
 void InitMotor(void){
 
@@ -88,22 +88,25 @@ void MmsToMove(motorsEnum motor, uint16_t milimeters, dirEnum direction){
 	if(direction == DIR_RIGHT) MotorDirectionRight(motor);
 	else MotorDirectionLeft(motor);
 
-	uint16_t amountOfSpins = (milimeters * 100 / gear_circ);
-	uint32_t steps = (amountOfSpins * STEPS_FOR_WHOLE_CIRCUMFERENCE)/100;
+	uint16_t amountOfSpins = (milimeters * 1000 / gear_circ);
+	uint32_t steps = (amountOfSpins * STEPS_FOR_WHOLE_CIRCUMFERENCE)/1000;
 	motorGroup.motors[motor].steps = steps;
 	HAL_Delay(500);
 	MotorEnable(motor);
 	HAL_TIM_Base_Start_IT(&htim5);
 }
 
+
+
+
 volatile uint32_t my_counter = 0;
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-    // Check if the interrupt came from your specific PWM timer (e.g., TIM2)
+    // check if interrupt came from TIM5
     if (htim->Instance == TIM5)
     {
-        my_counter++; // Your variable += 1
+        my_counter++;
         if(my_counter >= motorGroup.motors[EX_MOTOR].steps){
         	MotorDisable(EX_MOTOR);
         	my_counter = 0;

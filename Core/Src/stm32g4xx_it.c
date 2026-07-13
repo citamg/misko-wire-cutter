@@ -22,6 +22,8 @@
 #include "stm32g4xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "SCI.h"
+#include "periodic_services.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -54,6 +56,7 @@
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
+extern DMA_HandleTypeDef hdma_adc4;
 extern TIM_HandleTypeDef htim5;
 /* USER CODE BEGIN EV */
 
@@ -198,6 +201,73 @@ void SysTick_Handler(void)
 /******************************************************************************/
 
 /**
+  * @brief This function handles DMA1 channel1 global interrupt.
+  */
+void DMA1_Channel1_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA1_Channel1_IRQn 0 */
+
+  /* USER CODE END DMA1_Channel1_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_adc4);
+  /* USER CODE BEGIN DMA1_Channel1_IRQn 1 */
+
+  /* USER CODE END DMA1_Channel1_IRQn 1 */
+}
+
+/**
+  * @brief This function handles USART3 global interrupt / USART3 wake-up interrupt through EXTI line 28.
+  */
+void USART3_IRQHandler(void)
+{
+  /* USER CODE BEGIN USART3_IRQn 0 */
+	// Najprej preverimo, če je ta specifična prekinitev sploh omogočena. Uporabimo LL funkcijo.
+	if( LL_USART_IsEnabledIT_RXNE_RXFNE(USART3))		// sploh omogočena prekinitev ob RXNE?
+	{
+		// Če je prekinitev omogočena, potem preverimo še, če je postavljena ustrezna zastavica.
+		if( LL_USART_IsActiveFlag_RXNE_RXFNE(USART3) )	// postavljena zastavica RXNE?
+		{
+			// Če je ta specifična prekinitev omogočena in če je postavljena zastavica tega specifičnega
+			// prekinitvenega dogodka, potem se odzovemo s klicem ustrezne "callback" rutine.
+
+			SCI_receive_byte_Callback();
+
+			// V vednost: zastavica RXNE se zbriše avtomatsko, ko preberemo sprejemni register RDR.
+		}
+	}
+
+
+	// V premislek: ker se nahajamo znotraj USART3 splošne prekinitvene rutine (tj. USART3_IRQHandler() ),
+	// je popolnoma jasno, da je smiselno preverjati le zastavice enote USART3. Vidite, da tu
+	// ne potrebujemo informacije o tem, katera USARTx enota se uporablja - ker je to implicitno določeno:
+	// znotraj USART3_IRQHandler() nas seveda zanimajo zastavice vmesnika USART3.
+
+
+
+
+
+	// ------ Odzivanje na sprostitev oddajnega podatkovnega registra TDR (zastavica TXE = Transmitter Empty) -------
+
+	// Najprej preverimo, če je ta specifična prekinitev sploh omogočena. Uporabimo LL funkcijo.
+	if( LL_USART_IsEnabledIT_TXE_TXFNF(USART3) )		// sploh omogočena prekinitev ob TXE?
+	{
+		// Če je prekinitev omogočena, potem preverimo še, če je postavljena ustrezna zastavica.
+		if( LL_USART_IsActiveFlag_TXE_TXFNF(USART3) )		// postavljena zastavica TXE?
+		{
+			// Če je ta specifična prekinitev omogočena in če je postavljena zastavica tega specifičnega
+			// prekinitvenega dogodka, potem se odzovemo s klicem ustrezne "callback" rutine.
+
+			SCI_transmit_byte_Callback();
+
+			// V vednost: zastavica TXE se zbriše avtomatsko, ko pišemo v oddajni podatkovni register TDR.
+		}
+	}
+  /* USER CODE END USART3_IRQn 0 */
+  /* USER CODE BEGIN USART3_IRQn 1 */
+
+  /* USER CODE END USART3_IRQn 1 */
+}
+
+/**
   * @brief This function handles TIM5 global interrupt.
   */
 void TIM5_IRQHandler(void)
@@ -209,6 +279,25 @@ void TIM5_IRQHandler(void)
   /* USER CODE BEGIN TIM5_IRQn 1 */
 
   /* USER CODE END TIM5_IRQn 1 */
+}
+
+/**
+  * @brief This function handles TIM6 global interrupt, DAC1 and DAC3 channel underrun error interrupts.
+  */
+void TIM6_DAC_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM6_DAC_IRQn 0 */
+	if(LL_TIM_IsEnabledIT_UPDATE(TIM6)){
+		if(LL_TIM_IsActiveFlag_UPDATE(TIM6)){
+
+			PSERV_run_services_Callback();
+			LL_TIM_ClearFlag_UPDATE(TIM6);
+		}
+	}
+  /* USER CODE END TIM6_DAC_IRQn 0 */
+  /* USER CODE BEGIN TIM6_DAC_IRQn 1 */
+
+  /* USER CODE END TIM6_DAC_IRQn 1 */
 }
 
 /* USER CODE BEGIN 1 */
