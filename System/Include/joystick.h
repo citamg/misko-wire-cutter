@@ -78,7 +78,9 @@ typedef enum
 typedef enum {JOY_BTN_PRESSED_SIGNAL_STATE = 0, JOY_BTN_RELEASED_SIGNAL_STATE = 1}	joystick_button_sig_state_t;
 
 
+typedef enum {LEFT, RIGHT, NONE_H} joystick_move_dir_horizontal;
 
+typedef enum {UP, DOWN, NONE_V} joystick_move_dir_vertical;
 
 
 
@@ -105,6 +107,9 @@ uint8_t JOY_get_axis_position(joystick_axes_enum_t axis);
 void JOY_button_demo(void);
 void JOY_LED_demo(joystick_axes_enum_t axis);
 void JOY_SCI_send_status(void);
+
+joystick_move_dir_horizontal JOY_direction_to_move_horizontal(void);
+
 
 
 #endif /* INCLUDE_JOYSTICK_H_ */

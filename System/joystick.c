@@ -680,3 +680,30 @@ void JOY_SCI_send_status(void)
 }*/
 
 
+joystick_move_dir_horizontal JOY_direction_to_move_horizontal(void){
+
+	uint8_t relativePosition = JOY_get_axis_position(X);
+
+	if(relativePosition >= 75)
+		return RIGHT;
+	if(relativePosition <= 25)
+		return LEFT;
+
+	return NONE_H;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
