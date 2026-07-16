@@ -21,12 +21,16 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "motor.h"
-#include "joystick.h"
-#include "periodic_services.h"
 #include "SCI.h"
+
+#include "periodic_services.h"
 #include "timing_utils.h"
 #include "lcd_backlight.h"
+#include "lcd.h"
+#include "joystick.h"
+
+#include "graphics.h"
+#include "game.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -117,14 +121,18 @@ int main(void)
   MX_FMC_Init();
   MX_ADC4_Init();
   MX_TIM1_Init();
-  MX_TIM5_Init();
   /* USER CODE BEGIN 2 */
-  LCD_BKLT_init();
 
+
+  SCI_init();
+  //LIN_init();
+  //LED_demo();
   PSERV_init();
   PSERV_enable();
 
-  SCI_init();
+  LCD_BKLT_init();
+  LCD_Init();
+  LCD_uGUI_init();
   JOY_init(&hadc4, &htim1);
 
   //HAL_TIM_PWM_Start(&htim5, TIM_CHANNEL_2);
@@ -145,7 +153,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-
+	  Menu();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
