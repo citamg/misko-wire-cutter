@@ -6,49 +6,59 @@
  */
 
 #include "ugui_drawing.h"
-#include "graphics.h"   // pulls in LCD.h -> ugui.h (UG_* calls, colors, fonts)
+#include "graphics.h"
 #include "joystick.h"
-#include <string.h>      // strlen(), for centering text
+#include <string.h>
+
+#define FOCUSED_FRAME_THICKNESS 5
 
 
-// Draw one menu button. Filled when focused, outline-only when not.
-static void draw_button(int16_t x, int16_t y, int16_t w, int16_t h,
-                        const char *label, uint8_t focused)
-{
-    UG_COLOR fill = focused ? C_STEEL_BLUE : C_BLACK;
-    UG_COLOR edge = focused ? C_WHITE      : C_STEEL_BLUE;
 
-    UG_FillFrame(x, y, x + w, y + h, fill);      // button body
-    UG_DrawFrame(x, y, x + w, y + h, edge);      // button border
 
-    // center the label (FONT_12X16 -> each char is 12 px wide, 16 tall)
-    int16_t tw = 12 * (int16_t)strlen(label);
-    UG_FontSelect((UG_FONT*)&FONT_12X16);
-    UG_SetForecolor(C_WHITE);
-    UG_SetBackcolor(fill);                        // match body so no odd box behind text
-    UG_PutString(x + (w - tw) / 2, y + (h - 16) / 2, label);
+void drawButton(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, const char* label, uint8_t focused){
+
+	UG_FillFrame(x1, y1, x2, y2, C_BLACK);
+
+	if(focused == FOCUSED){
+		for(uint8_t i = 0; i < 5; i++){
+			UG_DrawFrame(x1 + i, y1 + i, x2 - i, y2 - i, C_WHITE);
+		}
+	}
+	else
+		UG_DrawFrame(x1, y1, x2, y2, C_WHITE);
+
+	uint16_t text_width = 12 * (uint16_t)strlen(label);
+	uint16_t text_x_cord = (x1 + (x2 - text_width)) / 2;
+	uint16_t text_y_cord = (y1 + (y2 - 16)) / 2; //16 because of font 12x16
+
+	UG_FontSelect((UG_FONT*) &FONT_12X16);
+	UG_SetForecolor(C_WHITE);
+	UG_SetBackcolor(C_BLACK);
+	UG_PutString(text_x_cord, text_y_cord, label);
+
+
+
 }
 
 
-// Draw the whole startup screen. focus: 0 = Manual, 1 = Preset.
-static void draw_startup_screen(uint8_t focus)
-{
-    UG_FillScreen(C_BLACK);                       // background
+void drawStartingMenu(FOCUSED_states_t manual_focus, FOCUSED_states_t preset_focus){
 
-    // ---- title bar ----
-    UG_FillFrame(0, 0, 319, 34, C_STEEL_BLUE);
-    UG_FontSelect((UG_FONT*)&FONT_12X16);
-    UG_SetForecolor(C_WHITE);
-    UG_SetBackcolor(C_STEEL_BLUE);
-    UG_PutString(90, 9, "WIRE CUTTER");
+	UG_FillFrame(0, 0, 320, 34, C_BLACK);
+	UG_DrawFrame(0, 0, 320, 34, C_WHITE);
 
-    // ---- two choice buttons ----
-    draw_button(20,  70, 125, 110, "MANUAL", focus == 0);
-    draw_button(175, 70, 125, 110, "PRESET", focus == 1);
+	UG_FontSelect((UG_FONT*)&FONT_12X16);
+	UG_SetForecolor(C_WHITE);
+	UG_SetBackcolor(C_BLACK);
+	UG_PutString(94 , 9, "WIRE CUTTER");
 
-    // ---- footer hint ----
-    UG_FontSelect((UG_FONT*)&FONT_7X12);
-    UG_SetForecolor(C_SILVER);
-    UG_SetBackcolor(C_BLACK);
-    UG_PutString(60, 215, "MOVE STICK   -   PRESS TO SELECT");
+
+
+
+	drawButton(20, 70, 145, 190, "MANUAL", manual_focus);
+	drawButton(175, 70, 300, 190, "PRESET", preset_focus);
+
+
 }
+
+
+

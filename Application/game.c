@@ -14,7 +14,7 @@
 
 #include "graphics.h"   // GFX_display_image_array(), DISPLAY_SIZE_* (pulls in LCD.h)
 #include "joystick.h"   // JOY_get_axis_position()
-
+#include "ugui_drawing.h"
 
 typedef enum { STARTING_MENU_DEFAULT, STARTING_MENU_PRESET, STARTING_MENU_MANUAL } STARTING_MENU_states_t;
 
@@ -36,7 +36,7 @@ void ManualMenu(void){
 		case MANUAL_MENU_DEFAULT:
 
 			if (needs_redraw) {
-				GFX_display_image_array((uint16_t*)manual_screen_default, 0, 0, 320, 240);
+				drawStartingMenu(NOT_FOCUSED, NOT_FOCUSED);
 				needs_redraw = 0;
 			}
 	}
@@ -58,7 +58,7 @@ void Menu(void)
 
 			if (needs_redraw)
 			{
-				GFX_display_image_array((uint16_t*) default_screen, 0, 0, 320, 240);
+				drawStartingMenu(NOT_FOCUSED, NOT_FOCUSED);
 				needs_redraw = 0;
 			}
 
@@ -82,7 +82,7 @@ void Menu(void)
 
 			if (needs_redraw)
 			{
-				GFX_display_image_array((uint16_t*) default_screen_preset, 0, 0, 320, 240);
+				drawStartingMenu(NOT_FOCUSED, FOCUSED);
 				needs_redraw = 0;
 			}
 
@@ -100,7 +100,7 @@ void Menu(void)
 		case STARTING_MENU_MANUAL:
 
 			if(needs_redraw){
-				GFX_display_image_array((uint16_t*) default_screen_manual, 0, 0, 320, 240);
+				drawStartingMenu(FOCUSED, NOT_FOCUSED);
 				needs_redraw = 0;
 			}
 			if(JOY_get_axis_position(X) > 70){

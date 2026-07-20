@@ -10,8 +10,11 @@
 
 #include <stdint.h>
 
-static void draw_button(int16_t x, int16_t y, int16_t w, int16_t h, const char *label, uint8_t focused);
-static void draw_startup_screen(uint8_t focus);
 
+
+typedef enum { FOCUSED, NOT_FOCUSED } FOCUSED_states_t;
+
+
+void drawStartingMenu(FOCUSED_states_t manual_focus, FOCUSED_states_t preset_focus);
 
 #endif /* INCLUDE_UGUI_DRAWING_H_ */
