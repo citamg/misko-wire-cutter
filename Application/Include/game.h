@@ -14,6 +14,6 @@
 // ---------------- Public function prototypes ----------------
 
 void Menu(void);
-void ManualMenu(void);
+uint8_t ManualMenu(void);
 
 #endif /* INCLUDE_GAME_H_ */

@@ -21,10 +21,11 @@ typedef enum { STARTING_MENU_DEFAULT, STARTING_MENU_PRESET, STARTING_MENU_MANUAL
 typedef enum { MANUAL_MENU_DEFAULT, MANUAL_MENU_STRIP_LENGTH, MANUAL_MENU_WIRE_LENGTH, MANUAL_MENU_WIRE_WIDTH, MANUAL_MENU_QUANTITY,
 			   MANUAL_MENU_START_BTN, MANUAL_MENU_BACK_BTN } MANUAL_MENU_states_t;
 
+static uint8_t exit_value = 0;
 
 
-void ManualMenu(void){
-
+uint8_t ManualMenu(void){
+	exit_value = 1;
 	JOY_flush();
 	static MANUAL_MENU_states_t state = MANUAL_MENU_DEFAULT;
 
@@ -36,11 +37,38 @@ void ManualMenu(void){
 		case MANUAL_MENU_DEFAULT:
 
 			if (needs_redraw) {
-				drawStartingMenu(NOT_FOCUSED, NOT_FOCUSED);
+				drawManualMenu(F, N_F, N_F, N_F, N_F, N_F);
 				needs_redraw = 0;
 			}
+			volatile uint8_t x = JOY_get_axis_position(Y);
+			if(x < 30){
+				state = MANUAL_MENU_STRIP_LENGTH;
+				needs_redraw = 1;
+			}
+
+			break;
+
+		case MANUAL_MENU_STRIP_LENGTH:
+
+			if(needs_redraw){
+				drawManualMenu(N_F, N_F, F, N_F, N_F, N_F);
+				needs_redraw = 0;
+			}
+			if(JOY_get_axis_position(Y) < 30){
+					state = MANUAL_MENU_DEFAULT;
+					needs_redraw = 1;
+			}
+			if(JOY_get_axis_position(Y) < 30){
+					state = MANUAL_MENU_WIRE_LENGTH;
+					needs_redraw = 1;
+			}
+			break;
+
 	}
+
 }
+
+
 
 
 void Menu(void)
@@ -52,22 +80,23 @@ void Menu(void)
 	// Draw the screen only when the state changes, not on every loop pass.
 	static uint8_t needs_redraw = 1;
 
+
 	switch (state)
 	{
 		case STARTING_MENU_DEFAULT:
 
 			if (needs_redraw)
 			{
-				drawStartingMenu(NOT_FOCUSED, NOT_FOCUSED);
+				drawStartingMenu(N_F, N_F);
 				needs_redraw = 0;
 			}
 
-			if (JOY_get_axis_position(X) > 70)
+			if (JOY_get_axis_position(X) > 70 && exit_value == 0)
 			{
 				state = STARTING_MENU_PRESET;
 				needs_redraw = 1;
 			}
-			else if(JOY_get_axis_position(X) < 30){
+			else if(JOY_get_axis_position(X) < 30 && exit_value == 0){
 				state = STARTING_MENU_MANUAL;
 				needs_redraw = 1;
 			}
@@ -82,11 +111,11 @@ void Menu(void)
 
 			if (needs_redraw)
 			{
-				drawStartingMenu(NOT_FOCUSED, FOCUSED);
+				drawStartingMenu(N_F, F);
 				needs_redraw = 0;
 			}
 
-			if (JOY_get_axis_position(X) < 30)
+			if (JOY_get_axis_position(X) < 30 && exit_value == 0)
 			{
 				state = STARTING_MENU_MANUAL;
 				needs_redraw = 1;
@@ -100,35 +129,31 @@ void Menu(void)
 		case STARTING_MENU_MANUAL:
 
 			if(needs_redraw){
-				drawStartingMenu(FOCUSED, NOT_FOCUSED);
+				drawStartingMenu(F, N_F);
 				needs_redraw = 0;
 			}
-			if(JOY_get_axis_position(X) > 70){
+			if(JOY_get_axis_position(X) > 70 && exit_value == 0){
 				state = STARTING_MENU_PRESET;
 				needs_redraw = 1;
 			}
 			JOY_scan_button();
 			pressed_key = JOY_get_pressed_button();
 			if(pressed_key == JOY_BTN_FIRE){
+				needs_redraw = 0;
 				ManualMenu();
 			}
 			break;
 
 
-		default:
+		/*default:
 
 			// Safety net for an undefined state.
 			state = STARTING_MENU_DEFAULT;
 			needs_redraw = 1;
 
-			break;
+			break;*/
 	}
 }
-
-
-
-
-
 
 
 

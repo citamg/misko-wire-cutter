@@ -204,7 +204,7 @@ void LCD_uGUI_init(void)
 	UG_Init(&gui, UserPixelSetFunction, ILI9341_GetParam(LCD_WIDTH), ILI9341_GetParam(LCD_HEIGHT));
 
 	// Nastavitev "default" fontov in barv za besedilo in ozadje.
-	UG_FontSelect(&FONT_8X12);
+	UG_FontSelect(&FONT_8X14);
 	UG_SetForecolor(C_WHITE);
 	UG_SetBackcolor(C_BLACK);
 
@@ -221,7 +221,7 @@ void LCD_uGUI_init(void)
 
 
 // Demonstracija izrisa grafike na zalon s pomočjo uGUI knjižnice.
-void LCD_uGUI_demo_Misko3(void)
+/*void LCD_uGUI_demo_Misko3(void)
 {
 
 	UG_FillScreen(C_BLACK);
@@ -256,7 +256,7 @@ void LCD_uGUI_demo_Misko3(void)
 	HAL_Delay(1000);
 
 }
-
+*/
 
 
 
