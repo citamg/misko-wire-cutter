@@ -11,9 +11,18 @@
 #define INCLUDE_GAME_H_
 
 
+typedef enum { DEFAULT_MENU, MANUAL_MENU, PRESET_MENU } MENU_states_t;
+
+typedef enum { STARTING_MENU_DEFAULT, STARTING_MENU_PRESET, STARTING_MENU_MANUAL, MANUAL_FUNC, PRESET_FUNC} STARTING_MENU_states_t;
+
+typedef enum { MANUAL_MENU_DEFAULT, MANUAL_MENU_STRIP_LENGTH, MANUAL_MENU_WIRE_LENGTH, MANUAL_MENU_WIRE_WIDTH, MANUAL_MENU_QUANTITY,
+			   MANUAL_MENU_START_BTN, MANUAL_MENU_BACK_BTN } MANUAL_MENU_states_t;
+
+
 // ---------------- Public function prototypes ----------------
 
-void Menu(void);
-uint8_t ManualMenu(void);
+void MainMenu(void);
+MENU_states_t DefaultMenu(void);
+MENU_states_t ManualMenu(void);
 
 #endif /* INCLUDE_GAME_H_ */

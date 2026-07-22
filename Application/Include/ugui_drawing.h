@@ -23,4 +23,7 @@ void drawStartingMenu(FOCUSED_states_t manual_focus, FOCUSED_states_t preset_foc
 void drawManualMenu(FOCUSED_states_t back_focus, FOCUSED_states_t start_focus, FOCUSED_states_t strip_length_focus,
 					FOCUSED_states_t wire_length_focus, FOCUSED_states_t wire_width_focus, FOCUSED_states_t quantity_focus);
 
+void drawStrippingLengthString(void);
+
+
 #endif /* INCLUDE_UGUI_DRAWING_H_ */

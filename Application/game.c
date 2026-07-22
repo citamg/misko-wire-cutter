@@ -15,36 +15,35 @@
 #include "graphics.h"   // GFX_display_image_array(), DISPLAY_SIZE_* (pulls in LCD.h)
 #include "joystick.h"   // JOY_get_axis_position()
 #include "ugui_drawing.h"
+#include "game.h"
 
-typedef enum { STARTING_MENU_DEFAULT, STARTING_MENU_PRESET, STARTING_MENU_MANUAL } STARTING_MENU_states_t;
-
-typedef enum { MANUAL_MENU_DEFAULT, MANUAL_MENU_STRIP_LENGTH, MANUAL_MENU_WIRE_LENGTH, MANUAL_MENU_WIRE_WIDTH, MANUAL_MENU_QUANTITY,
-			   MANUAL_MENU_START_BTN, MANUAL_MENU_BACK_BTN } MANUAL_MENU_states_t;
 
 static uint8_t exit_value = 0;
 
 
-uint8_t ManualMenu(void){
+MENU_states_t ManualMenu(void){
 	exit_value = 1;
-	JOY_flush();
 	static MANUAL_MENU_states_t state = MANUAL_MENU_DEFAULT;
 
 	// Draw the screen only when the state changes, not on every loop pass.
 	static uint8_t needs_redraw = 1;
+
+	joystick_buttons_enum_t pressed_key;
 
 	switch(state){
 
 		case MANUAL_MENU_DEFAULT:
 
 			if (needs_redraw) {
-				drawManualMenu(F, N_F, N_F, N_F, N_F, N_F);
+				drawManualMenu(N_F, N_F, N_F, N_F, N_F, N_F);
 				needs_redraw = 0;
 			}
-			volatile uint8_t x = JOY_get_axis_position(Y);
-			if(x < 30){
+			if(JOY_get_axis_position(Y) < 30){
 				state = MANUAL_MENU_STRIP_LENGTH;
 				needs_redraw = 1;
 			}
+
+			drawStrippingLengthString();
 
 			break;
 
@@ -55,48 +54,138 @@ uint8_t ManualMenu(void){
 				needs_redraw = 0;
 			}
 			if(JOY_get_axis_position(Y) < 30){
-					state = MANUAL_MENU_DEFAULT;
-					needs_redraw = 1;
+				state = MANUAL_MENU_WIRE_LENGTH;
+				needs_redraw = 1;
 			}
-			if(JOY_get_axis_position(Y) < 30){
-					state = MANUAL_MENU_WIRE_LENGTH;
-					needs_redraw = 1;
-			}
+
 			break;
 
-	}
+		case MANUAL_MENU_WIRE_LENGTH:
 
+			if(needs_redraw){
+				drawManualMenu(N_F, N_F, N_F, F, N_F, N_F);
+				needs_redraw = 0;
+			}
+			if(JOY_get_axis_position(Y) < 30){
+				state = MANUAL_MENU_WIRE_WIDTH;
+				needs_redraw = 1;
+			}
+			if(JOY_get_axis_position(Y) > 70){
+				state = MANUAL_MENU_STRIP_LENGTH;
+				needs_redraw = 1;
+			}
+
+			break;
+
+		case MANUAL_MENU_WIRE_WIDTH:
+
+			if(needs_redraw){
+				drawManualMenu(N_F, N_F, N_F, N_F, F, N_F);
+				needs_redraw = 0;
+			}
+			if(JOY_get_axis_position(Y) < 30){
+				state = MANUAL_MENU_QUANTITY;
+				needs_redraw = 1;
+			}
+			if(JOY_get_axis_position(Y) > 70){
+				state = MANUAL_MENU_WIRE_LENGTH;
+				needs_redraw = 1;
+			}
+
+			break;
+
+		case MANUAL_MENU_QUANTITY:
+
+			if(needs_redraw){
+				drawManualMenu(N_F, N_F, N_F, N_F, N_F, F);
+				needs_redraw = 0;
+			}
+			if(JOY_get_axis_position(Y) < 30){
+				state = MANUAL_MENU_START_BTN;
+				needs_redraw = 1;
+			}
+			if(JOY_get_axis_position(Y) > 70){
+				state = MANUAL_MENU_WIRE_WIDTH;
+				needs_redraw = 1;
+			}
+
+			break;
+
+		case MANUAL_MENU_START_BTN:
+
+			if(needs_redraw){
+				drawManualMenu(N_F, F, N_F, N_F, N_F, N_F);
+				needs_redraw = 0;
+			}
+			if(JOY_get_axis_position(X) < 30){
+				state = MANUAL_MENU_BACK_BTN;
+				needs_redraw = 1;
+			}
+			if(JOY_get_axis_position(Y) > 70){
+				state = MANUAL_MENU_QUANTITY;
+				needs_redraw = 1;
+			}
+
+			break;
+
+		case MANUAL_MENU_BACK_BTN:
+
+			if(needs_redraw){
+				drawManualMenu(F, N_F, N_F, N_F, N_F, N_F);
+				needs_redraw = 0;
+			}
+			if(JOY_get_axis_position(X) > 70){
+				state = MANUAL_MENU_START_BTN;
+				needs_redraw = 1;
+			}
+			if(JOY_get_axis_position(Y) > 70){
+				state = MANUAL_MENU_QUANTITY;
+				needs_redraw = 1;
+			}
+
+			JOY_scan_button();
+			pressed_key = JOY_get_pressed_button();
+			if(pressed_key == JOY_BTN_FIRE){
+				state = MANUAL_MENU_DEFAULT;
+				needs_redraw = 1;
+				return DEFAULT_MENU;
+			}
+
+			break;
+	}
+	return MANUAL_MENU;
 }
 
 
 
 
-void Menu(void)
+MENU_states_t DefaultMenu(void)
 {
-	joystick_buttons_enum_t pressed_key;
+
 
 	static STARTING_MENU_states_t state = STARTING_MENU_DEFAULT;
+
+	uint8_t exit_value = 0;
 
 	// Draw the screen only when the state changes, not on every loop pass.
 	static uint8_t needs_redraw = 1;
 
+	joystick_buttons_enum_t pressed_key;
 
 	switch (state)
 	{
 		case STARTING_MENU_DEFAULT:
 
-			if (needs_redraw)
-			{
+			if (needs_redraw){
 				drawStartingMenu(N_F, N_F);
 				needs_redraw = 0;
 			}
 
-			if (JOY_get_axis_position(X) > 70 && exit_value == 0)
-			{
+			if (JOY_get_axis_position(X) > 70){
 				state = STARTING_MENU_PRESET;
 				needs_redraw = 1;
 			}
-			else if(JOY_get_axis_position(X) < 30 && exit_value == 0){
+			else if(JOY_get_axis_position(X) < 30){
 				state = STARTING_MENU_MANUAL;
 				needs_redraw = 1;
 			}
@@ -109,19 +198,19 @@ void Menu(void)
 
 		case STARTING_MENU_PRESET:
 
-			if (needs_redraw)
-			{
+			if (needs_redraw){
 				drawStartingMenu(N_F, F);
 				needs_redraw = 0;
 			}
 
-			if (JOY_get_axis_position(X) < 30 && exit_value == 0)
-			{
+			if (JOY_get_axis_position(X) < 30){
 				state = STARTING_MENU_MANUAL;
 				needs_redraw = 1;
 			}
 			JOY_scan_button();
 			pressed_key = JOY_get_pressed_button();
+
+			//TO DO - PresetMenu
 
 			break;
 
@@ -132,32 +221,81 @@ void Menu(void)
 				drawStartingMenu(F, N_F);
 				needs_redraw = 0;
 			}
-			if(JOY_get_axis_position(X) > 70 && exit_value == 0){
+			if(JOY_get_axis_position(X) > 70){
 				state = STARTING_MENU_PRESET;
 				needs_redraw = 1;
 			}
 			JOY_scan_button();
 			pressed_key = JOY_get_pressed_button();
 			if(pressed_key == JOY_BTN_FIRE){
+				state = MANUAL_FUNC;
 				needs_redraw = 0;
-				ManualMenu();
+
 			}
 			break;
 
+		case MANUAL_FUNC:
 
-		/*default:
-
-			// Safety net for an undefined state.
-			state = STARTING_MENU_DEFAULT;
 			needs_redraw = 1;
+			state = MANUAL_MENU_DEFAULT;
+			return MANUAL_MENU;
 
-			break;*/
+			break;
+
+		case PRESET_FUNC:
+
+			//TO DO
+
+			break;
+
 	}
+	return DEFAULT_MENU;
 }
 
 
 
+void MainMenu(){
 
+	static MENU_states_t state = DEFAULT_MENU;
+
+	MENU_states_t exit_value;
+
+	switch(state){
+
+		case DEFAULT_MENU:
+
+			exit_value = DefaultMenu();
+
+			if(exit_value == DEFAULT_MENU)
+				state = DEFAULT_MENU;
+
+			if(exit_value == MANUAL_MENU)
+				state = MANUAL_MENU;
+
+			if(exit_value == PRESET_MENU)
+				state = PRESET_MENU;
+
+		break;
+
+		case MANUAL_MENU:
+
+			exit_value = ManualMenu();
+
+			if(exit_value == DEFAULT_MENU)
+				state = DEFAULT_MENU;
+
+		break;
+
+		case PRESET_MENU:
+
+			//TO DO
+
+		break;
+
+	}
+
+
+}
 
 
 
