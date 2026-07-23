@@ -20,140 +20,93 @@
 
 static uint8_t exit_value = 0;
 
+typedef enum { FOCUS_STATE, EDITING_STATE } MANUAL_MENU_t;
 
-MENU_states_t ManualMenu(void){
-	exit_value = 1;
-	static MANUAL_MENU_states_t state = MANUAL_MENU_DEFAULT;
+MENU_states_t ManualMenu(void)
+{
+	static MANUAL_MENU_t state;
+    static uint8_t entered = 0;
+    static MANUAL_ITEM_t focus = ITEM_STRIP;
+    static MANUAL_VALUES_t manual_val = {5, 250, 10, 10 };
 
-	// Draw the screen only when the state changes, not on every loop pass.
-	static uint8_t needs_redraw = 1;
+    if (!entered) {
+        entered = 1;
+        JOY_flush();
+        drawManualMenu(focus, &manual_val);          // full paint on entry
+    }
 
-	joystick_buttons_enum_t pressed_key;
 
-	switch(state){
+    int8_t step = JOY_get_axis_step(Y);
 
-		case MANUAL_MENU_DEFAULT:
+    switch(state){
 
-			if (needs_redraw) {
-				drawManualMenu(N_F, N_F, N_F, N_F, N_F, N_F);
-				needs_redraw = 0;
-			}
-			if(JOY_get_axis_position(Y) < 30){
-				state = MANUAL_MENU_STRIP_LENGTH;
-				needs_redraw = 1;
-			}
+    case FOCUS_STATE:
+		if (step != 0) {
+			MANUAL_ITEM_t old = focus;
 
-			drawStrippingLengthString();
+			int8_t f = (int8_t)focus - step;
 
-			break;
+			if (f > ITEM_COUNT - 1)
+				f = ITEM_COUNT - 1;
+			if (f < ITEM_STRIP)
+				f = ITEM_STRIP;
 
-		case MANUAL_MENU_STRIP_LENGTH:
+			focus = (MANUAL_ITEM_t)f;
 
-			if(needs_redraw){
-				drawManualMenu(N_F, N_F, F, N_F, N_F, N_F);
-				needs_redraw = 0;
-			}
-			if(JOY_get_axis_position(Y) < 30){
-				state = MANUAL_MENU_WIRE_LENGTH;
-				needs_redraw = 1;
-			}
+			if (focus != old)
+				drawManualMenu(focus, &manual_val);      // still a full redraw, that's fine for now
+		}
 
-			break;
-
-		case MANUAL_MENU_WIRE_LENGTH:
-
-			if(needs_redraw){
-				drawManualMenu(N_F, N_F, N_F, F, N_F, N_F);
-				needs_redraw = 0;
-			}
-			if(JOY_get_axis_position(Y) < 30){
-				state = MANUAL_MENU_WIRE_WIDTH;
-				needs_redraw = 1;
-			}
-			if(JOY_get_axis_position(Y) > 70){
-				state = MANUAL_MENU_STRIP_LENGTH;
-				needs_redraw = 1;
-			}
-
-			break;
-
-		case MANUAL_MENU_WIRE_WIDTH:
-
-			if(needs_redraw){
-				drawManualMenu(N_F, N_F, N_F, N_F, F, N_F);
-				needs_redraw = 0;
-			}
-			if(JOY_get_axis_position(Y) < 30){
-				state = MANUAL_MENU_QUANTITY;
-				needs_redraw = 1;
-			}
-			if(JOY_get_axis_position(Y) > 70){
-				state = MANUAL_MENU_WIRE_LENGTH;
-				needs_redraw = 1;
-			}
-
-			break;
-
-		case MANUAL_MENU_QUANTITY:
-
-			if(needs_redraw){
-				drawManualMenu(N_F, N_F, N_F, N_F, N_F, F);
-				needs_redraw = 0;
-			}
-			if(JOY_get_axis_position(Y) < 30){
-				state = MANUAL_MENU_START_BTN;
-				needs_redraw = 1;
-			}
-			if(JOY_get_axis_position(Y) > 70){
-				state = MANUAL_MENU_WIRE_WIDTH;
-				needs_redraw = 1;
-			}
-
-			break;
-
-		case MANUAL_MENU_START_BTN:
-
-			if(needs_redraw){
-				drawManualMenu(N_F, F, N_F, N_F, N_F, N_F);
-				needs_redraw = 0;
-			}
-			if(JOY_get_axis_position(X) < 30){
-				state = MANUAL_MENU_BACK_BTN;
-				needs_redraw = 1;
-			}
-			if(JOY_get_axis_position(Y) > 70){
-				state = MANUAL_MENU_QUANTITY;
-				needs_redraw = 1;
-			}
-
-			break;
-
-		case MANUAL_MENU_BACK_BTN:
-
-			if(needs_redraw){
-				drawManualMenu(F, N_F, N_F, N_F, N_F, N_F);
-				needs_redraw = 0;
-			}
-			if(JOY_get_axis_position(X) > 70){
-				state = MANUAL_MENU_START_BTN;
-				needs_redraw = 1;
-			}
-			if(JOY_get_axis_position(Y) > 70){
-				state = MANUAL_MENU_QUANTITY;
-				needs_redraw = 1;
-			}
-
-			JOY_scan_button();
-			pressed_key = JOY_get_pressed_button();
-			if(pressed_key == JOY_BTN_FIRE){
-				state = MANUAL_MENU_DEFAULT;
-				needs_redraw = 1;
+		JOY_scan_button();
+		if (JOY_get_pressed_button() == JOY_BTN_FIRE) {
+			if (focus == ITEM_BACK) {
+				entered = 0;                // so it repaints next time you come back
 				return DEFAULT_MENU;
 			}
+			if(focus != ITEM_START && focus != ITEM_BACK){
+				entered = 0;
+				state = EDITING_STATE;
+			}
+		}
+		break;
+    case EDITING_STATE:
 
-			break;
+    	if(focus == ITEM_STRIP){
+    		static int16_t speed_up = 500;
+    		static uint8_t count = 0;
+    		char buf[16];
+    		uint16_t old = manual_val.strip_length;
+
+    		if(JOY_get_axis_position(Y) > 70){
+    			if(count > 10 ) manual_val.strip_length += 10;
+    			else	 manual_val.strip_length++;
+    			count++;
+    			speed_up -= 25*count;
+    			if(speed_up < 0) speed_up = 100;
+    		}
+			if(JOY_get_axis_position(Y) < 30){
+				manual_val.strip_length--;
+				count = 0;
+				speed_up = 500;
+			}
+			if(JOY_get_axis_position(Y) > 30 && JOY_get_axis_position(Y) < 70){
+				count = 0;
+				speed_up = 500;
+			}
+			if(manual_val.strip_length > 1000) 	manual_val.strip_length = 1000;
+    		if(manual_val.strip_length != old){
+			sprintf(buf, "%4d mm", manual_val.strip_length);
+			drawButton(20, 40, 300, 70, "Stripping length", buf, LEFT_AL, SMALL_FONT, focus == ITEM_STRIP);
+			HAL_Delay(speed_up);
+    		}
+
+    	}
+
+
+
+    	break;
 	}
-	return MANUAL_MENU;
+    return MANUAL_MENU;
 }
 
 
@@ -164,8 +117,6 @@ MENU_states_t DefaultMenu(void)
 
 
 	static STARTING_MENU_states_t state = STARTING_MENU_DEFAULT;
-
-	uint8_t exit_value = 0;
 
 	// Draw the screen only when the state changes, not on every loop pass.
 	static uint8_t needs_redraw = 1;
@@ -293,8 +244,6 @@ void MainMenu(){
 		break;
 
 	}
-
-
 }
 
 

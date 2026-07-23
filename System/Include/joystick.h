@@ -110,6 +110,6 @@ void JOY_SCI_send_status(void);
 
 joystick_move_dir_horizontal JOY_direction_to_move_horizontal(void);
 
-
+int8_t JOY_get_axis_step(joystick_axes_enum_t axis);
 
 #endif /* INCLUDE_JOYSTICK_H_ */

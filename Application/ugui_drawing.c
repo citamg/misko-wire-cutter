@@ -15,7 +15,7 @@
 
 
 void drawButton(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, const char* label,
-				TEXT_ALLING_states_t allign, FONT_states_t font, uint8_t focused){
+				const char* value, TEXT_ALLING_states_t allign, FONT_states_t font, uint8_t focused){
 
 
 	uint8_t font_height;
@@ -34,7 +34,7 @@ void drawButton(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, const char* 
 
 	UG_FillFrame(x1, y1, x2, y2, C_BLACK);
 
-	if(focused == F){
+	if(focused == 1){
 		for(uint8_t i = 0; i < 3; i++){
 			UG_DrawFrame(x1 + i, y1 + i, x2 - i, y2 - i, C_WHITE);
 		}
@@ -59,7 +59,10 @@ void drawButton(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, const char* 
 	UG_SetBackcolor(C_BLACK);
 	UG_PutString(text_x_cord, text_y_cord, label);
 
-
+	if(value != NULL){
+		uint16_t val_w = font_width * (uint16_t)strlen(value);
+		UG_PutString(x2 - 10 - val_w, text_y_cord, value);
+	}
 
 }
 
@@ -77,13 +80,13 @@ void drawStartingMenu(FOCUSED_states_t manual_focus, FOCUSED_states_t preset_foc
 
 
 
-	drawButton(20, 70, 145, 190, "MANUAL", CENTER_AL, BIG_FONT, manual_focus);
-	drawButton(175, 70, 300, 190, "PRESET", CENTER_AL, BIG_FONT, preset_focus);
+	drawButton(20, 70, 145, 190, "MANUAL", NULL,  CENTER_AL, BIG_FONT, manual_focus);
+	drawButton(175, 70, 300, 190, "PRESET", NULL, CENTER_AL, BIG_FONT, preset_focus);
 
 
 }
 
-void drawManualMenu(FOCUSED_states_t back_focus, FOCUSED_states_t start_focus, FOCUSED_states_t strip_length_focus, FOCUSED_states_t wire_length_focus, FOCUSED_states_t wire_width_focus, FOCUSED_states_t quantity_focus){
+void drawManualMenu(MANUAL_ITEM_t focus, MANUAL_VALUES_t *values){
 	LCD_ClearScreen();
 	UG_FillFrame(0, 0, 320, 34, C_BLACK);
 	UG_DrawFrame(0, 0, 320, 34, C_WHITE);
@@ -93,16 +96,19 @@ void drawManualMenu(FOCUSED_states_t back_focus, FOCUSED_states_t start_focus, F
 	UG_SetBackcolor(C_BLACK);
 	UG_PutString(94 , 9, "MANUAL SETUP");
 
+	char buf[16];
 
+	sprintf(buf, "%4d mm", values->strip_length);
+	drawButton(20, 40, 300, 70, "Stripping length", buf, LEFT_AL, SMALL_FONT, focus == ITEM_STRIP);
+	sprintf(buf, "%4d mm", values->wire_length);
+	drawButton(20, 80, 300, 110, "Wire length", buf, LEFT_AL, SMALL_FONT, focus == ITEM_WIRE_LEN);
+	sprintf(buf, "%4d mm^2", values->wire_width);
+	drawButton(20, 120, 300, 150, "Wire width", buf, LEFT_AL, SMALL_FONT, focus == ITEM_WIRE_W);
+	sprintf(buf, "%4d ", values->quantity);
+	drawButton(20, 160, 300, 190, "Quantity", buf, LEFT_AL, SMALL_FONT, focus == ITEM_QTY);
 
-
-	drawButton(20, 40, 300, 70, "Stripping length", LEFT_AL, SMALL_FONT, strip_length_focus);
-	drawButton(20, 80, 300, 110, "Wire length", LEFT_AL, SMALL_FONT, wire_length_focus);
-	drawButton(20, 120, 300, 150, "Wire width", LEFT_AL, SMALL_FONT, wire_width_focus);
-	drawButton(20, 160, 300, 190, "Quantity", LEFT_AL, SMALL_FONT, quantity_focus);
-
-	drawButton(20, 206, 150, 240, "BACK", CENTER_AL, BIG_FONT, back_focus);
-	drawButton(170, 206, 300, 240, "START", CENTER_AL, BIG_FONT, start_focus);
+	drawButton(20, 206, 150, 240, "BACK", NULL, CENTER_AL, BIG_FONT, focus == ITEM_BACK);
+	drawButton(170, 206, 300, 240, "START", NULL, CENTER_AL, BIG_FONT, focus ==ITEM_START);
 
 }
 

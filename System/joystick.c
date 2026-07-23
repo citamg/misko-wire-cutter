@@ -692,7 +692,22 @@ joystick_move_dir_horizontal JOY_direction_to_move_horizontal(void){
 	return NONE_H;
 }
 
+int8_t JOY_get_axis_step(joystick_axes_enum_t axis)
+{
+    static uint8_t armed[NUM_OF_AXES] = { 1, 1 };
+    uint8_t p = JOY_get_axis_position(axis);
 
+    if (p > 70 && armed[axis]){
+    	armed[axis] = 0; return +1;
+    }
+    if (p < 30 && armed[axis]){
+    	armed[axis] = 0; return -1;
+    }
+    if (p >= 40 && p <= 60){
+    	armed[axis] = 1;
+    }
+    return 0;
+}
 
 
 
