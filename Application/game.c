@@ -20,7 +20,7 @@
 
 static uint8_t exit_value = 0;
 
-typedef enum { FOCUS_STATE, EDITING_STATE } MANUAL_MENU_t;
+
 
 MENU_states_t ManualMenu(void)
 {
@@ -77,25 +77,30 @@ MENU_states_t ManualMenu(void)
     		char buf[16];
     		uint16_t old = manual_val.strip_length;
 
+
     		if(JOY_get_axis_position(Y) > 70){
     			if(count > 10 ) manual_val.strip_length += 10;
     			else	 manual_val.strip_length++;
     			count++;
-    			speed_up -= 25*count;
-    			if(speed_up < 0) speed_up = 100;
+    			speed_up -= 25 * count;
+    			if(speed_up < 0) speed_up = 100;				//lock fastest possible move speed
     		}
 			if(JOY_get_axis_position(Y) < 30){
-				manual_val.strip_length--;
-				count = 0;
-				speed_up = 500;
+				if(count > 10 ) manual_val.strip_length -= 10;
+				else	 manual_val.strip_length--;
+				count++;
+				speed_up -= 25 * count;
+				if(speed_up < 0) speed_up = 100;				//lock fastest possible move speed
 			}
 			if(JOY_get_axis_position(Y) > 30 && JOY_get_axis_position(Y) < 70){
 				count = 0;
 				speed_up = 500;
 			}
+
+
 			if(manual_val.strip_length > 1000) 	manual_val.strip_length = 1000;
     		if(manual_val.strip_length != old){
-			sprintf(buf, "%4d mm", manual_val.strip_length);
+			sprintf(buf, "%4d mm", manual_val.strip_length);	//transforms strip length and puts in buf to display it as string
 			drawButton(20, 40, 300, 70, "Stripping length", buf, LEFT_AL, SMALL_FONT, focus == ITEM_STRIP);
 			HAL_Delay(speed_up);
     		}
