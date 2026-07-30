@@ -54,13 +54,13 @@ MENU_states_t ManualMenu(void)
 			focus = (MANUAL_ITEM_t)f;
 
 			if (focus != old)
-				drawManualMenu(focus, &manual_val);      // still a full redraw, that's fine for now
+				drawManualMenu(focus, &manual_val);      //full redraw
 		}
 
 		JOY_scan_button();
 		if (JOY_get_pressed_button() == JOY_BTN_FIRE) {
 			if (focus == ITEM_BACK) {
-				entered = 0;                // so it repaints next time you come back
+				entered = 0;                			//repaints the menu
 				return DEFAULT_MENU;
 			}
 			if(focus != ITEM_START && focus != ITEM_BACK){
@@ -71,40 +71,22 @@ MENU_states_t ManualMenu(void)
 		break;
     case EDITING_STATE:
 
-    	if(focus == ITEM_STRIP){
-    		static int16_t speed_up = 500;
-    		static uint8_t count = 0;
-    		char buf[16];
-    		uint16_t old = manual_val.strip_length;
+    	switch(focus){
+    		case ITEM_STRIP:
+			EditingValue(manual_val, ITEM_STRIP);
+			break;
 
+    		case ITEM_WIRE_LEN:
+			EditingValue(manual_val, ITEM_STRIP);
+			break;
 
-    		if(JOY_get_axis_position(Y) > 70){
-    			if(count > 10 ) manual_val.strip_length += 10;
-    			else	 manual_val.strip_length++;
-    			count++;
-    			speed_up -= 25 * count;
-    			if(speed_up < 0) speed_up = 100;				//lock fastest possible move speed
-    		}
-			if(JOY_get_axis_position(Y) < 30){
-				if(count > 10 ) manual_val.strip_length -= 10;
-				else	 manual_val.strip_length--;
-				count++;
-				speed_up -= 25 * count;
-				if(speed_up < 0) speed_up = 100;				//lock fastest possible move speed
-			}
-			if(JOY_get_axis_position(Y) > 30 && JOY_get_axis_position(Y) < 70){
-				count = 0;
-				speed_up = 500;
-			}
+    		case ITEM_WIRE_W:
+			EditingValue(manual_val, ITEM_STRIP);
+			break;
 
-
-			if(manual_val.strip_length > 1000) 	manual_val.strip_length = 1000;
-    		if(manual_val.strip_length != old){
-			sprintf(buf, "%4d mm", manual_val.strip_length);	//transforms strip length and puts in buf to display it as string
-			drawButton(20, 40, 300, 70, "Stripping length", buf, LEFT_AL, SMALL_FONT, focus == ITEM_STRIP);
-			HAL_Delay(speed_up);
-    		}
-
+    		case ITEM_QTY:
+			EditingValue(manual_val, ITEM_STRIP);
+			break;
     	}
 
 
@@ -252,7 +234,46 @@ void MainMenu(){
 }
 
 
+MANUAL_MENU_t EditingValue(MANUAL_VALUES_t* manual_val, MANUAL_ITEM_t focus){
+	joystick_buttons_enum_t pressed_key = JOY_BTN_NONE;
+	while(pressed_key != JOY_BTN_FIRE){
+		static int16_t speed_up = 500;
+		static uint8_t count = 0;
+		char buf[16];
+		uint16_t old = manual_val->strip_length;
 
+
+		if(JOY_get_axis_position(Y) > 70){
+			if(count > 10 ) manual_val->strip_length += 10;
+			else	 manual_val->strip_length++;
+			count++;
+			speed_up -= 25 * count;
+			if(speed_up < 0) speed_up = 100;				//lock fastest possible move speed
+		}
+		if(JOY_get_axis_position(Y) < 30){
+			if(count > 10 ) manual_val->strip_length -= 10;
+			else	 manual_val->strip_length--;
+			count++;
+			speed_up -= 25 * count;
+			if(speed_up < 0) speed_up = 100;				//lock fastest possible move speed
+		}
+		if(JOY_get_axis_position(Y) > 30 && JOY_get_axis_position(Y) < 70){
+			count = 0;
+			speed_up = 500;
+		}
+
+
+		if(manual_val->strip_length > 1000) 	manual_val->strip_length = 1000;
+		if(manual_val->strip_length != old){
+			sprintf(buf, "%4d mm", manual_val->strip_length);	//transforms strip length and puts in buf to display it as string
+			drawButton(20, 40, 300, 70, "Stripping length", buf, LEFT_AL, SMALL_FONT, focus == ITEM_STRIP);
+			HAL_Delay(speed_up);
+			}
+		JOY_scan_button();
+		pressed_key = JOY_get_pressed_button();
+	}
+	return FOCUS_STATE;
+}
 
 
 

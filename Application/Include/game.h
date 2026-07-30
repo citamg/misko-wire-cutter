@@ -29,5 +29,5 @@ void MainMenu(void);
 MENU_states_t DefaultMenu(void);
 MENU_states_t ManualMenu(void);
 
-MANUAL_MENU_t EditingValue(MANUAL_VALUES_t* value_struct, );
+MANUAL_MENU_t EditingValue(MANUAL_VALUES_t* manual_val, MANUAL_ITEM_t focus);
 #endif /* INCLUDE_GAME_H_ */
