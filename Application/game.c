@@ -73,19 +73,19 @@ MENU_states_t ManualMenu(void)
 
     	switch(focus){
     		case ITEM_STRIP:
-			EditingValue(manual_val, ITEM_STRIP);
+			state = EditingValue(&manual_val, ITEM_STRIP);
 			break;
 
     		case ITEM_WIRE_LEN:
-			EditingValue(manual_val, ITEM_STRIP);
+			state = EditingValue(&manual_val, ITEM_WIRE_LEN);
 			break;
 
     		case ITEM_WIRE_W:
-			EditingValue(manual_val, ITEM_STRIP);
+			state = EditingValue(&manual_val, ITEM_WIRE_W);
 			break;
 
     		case ITEM_QTY:
-			EditingValue(manual_val, ITEM_STRIP);
+			state = EditingValue(&manual_val, ITEM_QTY);
 			break;
     	}
 
@@ -235,24 +235,61 @@ void MainMenu(){
 
 
 MANUAL_MENU_t EditingValue(MANUAL_VALUES_t* manual_val, MANUAL_ITEM_t focus){
+	uint16_t* temp = NULL;
 	joystick_buttons_enum_t pressed_key = JOY_BTN_NONE;
+	uint16_t value_to_change = 0;
+	char* btn_text = "Empty";
+	uint8_t mul;
+//swtich case to determine what value to change
+	switch(focus){
+	case ITEM_STRIP:
+		value_to_change = manual_val->strip_length;
+		temp = &manual_val->strip_length;
+		btn_text = "Stripping length";
+		mul = 0;
+		break;
+	case ITEM_WIRE_LEN:
+		value_to_change = manual_val->wire_length;
+		temp = &manual_val->wire_length;
+		btn_text = "Wire length";
+		mul = 1;
+		break;
+	case ITEM_WIRE_W:
+		value_to_change = manual_val->wire_width;
+		temp = &manual_val->wire_width;
+		btn_text = "Wire width";
+		mul = 2;
+		break;
+	case ITEM_QTY:
+		value_to_change = manual_val->quantity;
+		temp = &manual_val->quantity;
+		btn_text = "Quantity";
+		mul = 3;
+		break;
+	}
+
+
+	uint16_t old = value_to_change;
+
 	while(pressed_key != JOY_BTN_FIRE){
 		static int16_t speed_up = 500;
 		static uint8_t count = 0;
 		char buf[16];
-		uint16_t old = manual_val->strip_length;
+		uint16_t new = old;
+
+
 
 
 		if(JOY_get_axis_position(Y) > 70){
-			if(count > 10 ) manual_val->strip_length += 10;
-			else	 manual_val->strip_length++;
+			if(count > 10 ) new += 10;
+			else	 new++;
 			count++;
 			speed_up -= 25 * count;
 			if(speed_up < 0) speed_up = 100;				//lock fastest possible move speed
 		}
 		if(JOY_get_axis_position(Y) < 30){
-			if(count > 10 ) manual_val->strip_length -= 10;
-			else	 manual_val->strip_length--;
+			if(count > 10 ) new -= 10;
+			else	 new--;
 			count++;
 			speed_up -= 25 * count;
 			if(speed_up < 0) speed_up = 100;				//lock fastest possible move speed
@@ -263,15 +300,23 @@ MANUAL_MENU_t EditingValue(MANUAL_VALUES_t* manual_val, MANUAL_ITEM_t focus){
 		}
 
 
-		if(manual_val->strip_length > 1000) 	manual_val->strip_length = 1000;
-		if(manual_val->strip_length != old){
-			sprintf(buf, "%4d mm", manual_val->strip_length);	//transforms strip length and puts in buf to display it as string
-			drawButton(20, 40, 300, 70, "Stripping length", buf, LEFT_AL, SMALL_FONT, focus == ITEM_STRIP);
+		if(new > 1000) 	new = 0;
+		if(new < 0) new = 1000;
+		if(new != old){
+			if(focus == ITEM_STRIP || focus == ITEM_WIRE_LEN) sprintf(buf, "%4d mm", new);	//transforms strip length and puts in buf to display it as string
+			if(focus == ITEM_WIRE_W) sprintf(buf, "%4d mm^2", new);
+			if(focus == ITEM_QTY) sprintf(buf, "%4d ", new);
+			drawButton(20, 40 + mul * 40, 300, 70 + mul * 40, btn_text, buf, LEFT_AL, SMALL_FONT, 1);
 			HAL_Delay(speed_up);
 			}
 		JOY_scan_button();
 		pressed_key = JOY_get_pressed_button();
+
+		old = new;
+
+		*temp = new;
 	}
+
 	return FOCUS_STATE;
 }
 
