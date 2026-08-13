@@ -115,11 +115,14 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     }
 }
 
-void CuttingSequence(void){
-	MmsToMove(EX_MOTOR, 8, DIR_RIGHT);
+void CuttingSequence(uint16_t strip_len, uint16_t wire_len, uint16_t qty){
+
+	for(uint8_t i = qty; i != 0; i--){
+	MmsToMove(EX_MOTOR, strip_len, DIR_RIGHT);
 	HAL_Delay(5000);
-	MmsToMove(EX_MOTOR, 100, DIR_RIGHT);
+	MmsToMove(EX_MOTOR, wire_len - 2*strip_len, DIR_RIGHT);
 	HAL_Delay(5000);
-	MmsToMove(EX_MOTOR, 8, DIR_RIGHT);
+	MmsToMove(EX_MOTOR, strip_len, DIR_RIGHT);
+	}
 }
 

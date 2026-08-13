@@ -34,7 +34,7 @@ void MotorDirectionLeft(motorsEnum motor);
 void MotorEnable(motorsEnum motor);
 void MotorDisable(motorsEnum motor);
 void MmsToMove(motorsEnum motor, uint16_t milimeters, dirEnum direction);
-void CuttingSequence(void);
+void CuttingSequence(uint16_t strip_len, uint16_t wire_len, uint16_t qty);
 
 
 #endif /* INCLUDE_MOTOR_H_ */

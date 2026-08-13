@@ -112,3 +112,9 @@ void drawManualMenu(MANUAL_ITEM_t focus, MANUAL_VALUES_t *values){
 
 }
 
+void drawWaitingScreen(void){
+	LCD_ClearScreen();
+	UG_FillFrame(0, 0, 320, 34, C_BLACK);
+	UG_FontSelect((UG_FONT*)&FONT_12X16);
+	UG_PutString(160, 120, "Waiting");
+}

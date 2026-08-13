@@ -11,7 +11,7 @@
 #define INCLUDE_GAME_H_
 
 #include "ugui_drawing.h"
-
+#include "motor.h"
 
 
 typedef enum { DEFAULT_MENU, MANUAL_MENU, PRESET_MENU } MENU_states_t;

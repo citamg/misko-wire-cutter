@@ -31,7 +31,7 @@ void drawButton(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, const char* 
 void drawStartingMenu(FOCUSED_states_t manual_focus, FOCUSED_states_t preset_focus);
 void drawManualMenu(MANUAL_ITEM_t focus, MANUAL_VALUES_t *values);
 
-
+void drawWaitingScreen(void);
 
 
 #endif /* INCLUDE_UGUI_DRAWING_H_ */

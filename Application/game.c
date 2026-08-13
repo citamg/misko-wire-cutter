@@ -67,6 +67,12 @@ MENU_states_t ManualMenu(void)
 				entered = 0;
 				state = EDITING_STATE;
 			}
+			if(focus == ITEM_START){
+				entered = 0;
+				drawWaitingScreen();
+				CuttingSequence(manual_val.strip_length, manual_val.wire_length, manual_val.quantity);
+				return MANUAL_MENU;
+			}
 		}
 		break;
     case EDITING_STATE:
@@ -319,6 +325,8 @@ MANUAL_MENU_t EditingValue(MANUAL_VALUES_t* manual_val, MANUAL_ITEM_t focus){
 
 	return FOCUS_STATE;
 }
+
+
 
 
 
