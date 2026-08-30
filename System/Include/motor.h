@@ -35,6 +35,8 @@ void MotorEnable(motorsEnum motor);
 void MotorDisable(motorsEnum motor);
 void MmsToMove(motorsEnum motor, uint16_t milimeters, dirEnum direction);
 void CuttingSequence(uint16_t strip_len, uint16_t wire_len, uint16_t qty);
-
+void StepEngineStart(motorsEnum motor, uint32_t steps);
+void StepEngineStop(motorsEnum motor);
+uint8_t StepEngineIsBusy(motorsEnum motor);
 
 #endif /* INCLUDE_MOTOR_H_ */

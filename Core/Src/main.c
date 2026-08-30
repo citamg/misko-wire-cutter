@@ -121,6 +121,7 @@ int main(void)
   MX_FMC_Init();
   MX_ADC4_Init();
   MX_TIM1_Init();
+  MX_TIM5_Init();
   /* USER CODE BEGIN 2 */
 
 
@@ -135,25 +136,22 @@ int main(void)
   LCD_uGUI_init();
   JOY_init(&hadc4, &htim1);
 
-  //HAL_TIM_PWM_Start(&htim5, TIM_CHANNEL_2);
-  //InitMotor();
-  //MotorDisable(EX_MOTOR);
 
-  //HAL_Delay(1000);
-  //MotorEnable(EX_MOTOR);
-  //CuttingSequence();
-  //MmsToMove(EX_MOTOR, 100, DIR_RIGHT);
+  InitMotor();
+
+
+
+  MmsToMove(EX_MOTOR, 500, DIR_RIGHT);
 
 
   //JOY_SCI_send_status();
 
-  /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  MainMenu();
+	  //MainMenu();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

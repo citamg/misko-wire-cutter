@@ -17,6 +17,7 @@ typedef enum { LEFT_AL, CENTER_AL } TEXT_ALLING_states_t;
 typedef enum { SMALL_FONT, BIG_FONT } FONT_states_t;
 typedef enum { 	ITEM_STRIP, ITEM_WIRE_LEN, ITEM_WIRE_W, ITEM_QTY,
 				ITEM_BACK, ITEM_START, ITEM_COUNT, ITEM_NONE} MANUAL_ITEM_t;
+typedef enum {	ITEM_PRESET_1, ITEM_PRESET_2, ITEM_PRESET_3, ITEM_PRESET_4 } PRESET_ITEM_t;
 
 typedef struct{
 	uint16_t strip_length;
@@ -30,8 +31,9 @@ void drawButton(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, const char* 
 				const char* value, TEXT_ALLING_states_t allign, FONT_states_t font, uint8_t focused);
 void drawStartingMenu(FOCUSED_states_t manual_focus, FOCUSED_states_t preset_focus);
 void drawManualMenu(MANUAL_ITEM_t focus, MANUAL_VALUES_t *values);
-
+void drawPresetMenu(PRESET_ITEM_t focus);
 void drawWaitingScreen(void);
+
 
 
 #endif /* INCLUDE_UGUI_DRAWING_H_ */

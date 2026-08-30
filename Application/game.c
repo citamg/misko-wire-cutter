@@ -154,7 +154,11 @@ MENU_states_t DefaultMenu(void)
 			JOY_scan_button();
 			pressed_key = JOY_get_pressed_button();
 
-			//TO DO - PresetMenu
+			if(pressed_key == JOY_BTN_FIRE){
+				state = PRESET_FUNC;
+				needs_redraw = 0;
+
+			}
 
 			break;
 
@@ -181,14 +185,16 @@ MENU_states_t DefaultMenu(void)
 		case MANUAL_FUNC:
 
 			needs_redraw = 1;
-			state = MANUAL_MENU_DEFAULT;
+			//state = MANUAL_MENU_DEFAULT;
 			return MANUAL_MENU;
 
 			break;
 
 		case PRESET_FUNC:
 
-			//TO DO
+			needs_redraw = 1;
+			//state = MANUAL_MENU_DEFAULT;
+			return PRESET_MENU;
 
 			break;
 
@@ -232,7 +238,10 @@ void MainMenu(){
 
 		case PRESET_MENU:
 
-			//TO DO
+			exit_value = PresetMenu();
+
+			if(exit_value == DEFAULT_MENU)
+				state = DEFAULT_MENU;
 
 		break;
 
@@ -328,7 +337,14 @@ MANUAL_MENU_t EditingValue(MANUAL_VALUES_t* manual_val, MANUAL_ITEM_t focus){
 
 
 
+MENU_states_t PresetMenu(void){
 
+
+	drawPresetMenu(ITEM_PRESET_1);
+
+	while(1);
+	return DEFAULT_MENU;
+}
 
 
 

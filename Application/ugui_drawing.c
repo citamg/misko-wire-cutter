@@ -112,6 +112,20 @@ void drawManualMenu(MANUAL_ITEM_t focus, MANUAL_VALUES_t *values){
 
 }
 
+void drawPresetMenu(PRESET_ITEM_t focus){
+	LCD_ClearScreen();
+	UG_FillFrame(0, 0, 320, 34, C_BLACK);
+	UG_DrawFrame(0, 0, 320, 34, C_WHITE);
+
+	UG_FontSelect((UG_FONT*)&FONT_12X16);
+	UG_SetForecolor(C_WHITE);
+	UG_SetBackcolor(C_BLACK);
+	UG_PutString(94 , 9, "PRESET MENU");
+
+
+}
+
+
 void drawWaitingScreen(void){
 	LCD_ClearScreen();
 	UG_FillFrame(0, 0, 320, 34, C_BLACK);
