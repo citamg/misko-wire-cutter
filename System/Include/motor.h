@@ -39,4 +39,7 @@ void StepEngineStart(motorsEnum motor, uint32_t steps);
 void StepEngineStop(motorsEnum motor);
 uint8_t StepEngineIsBusy(motorsEnum motor);
 
+void StepEngineSetProfile(motorsEnum motor, float v_min, float v_target, float accel);
+void MotionControlTick(void);
+
 #endif /* INCLUDE_MOTOR_H_ */

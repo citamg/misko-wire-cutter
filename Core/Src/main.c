@@ -124,28 +124,31 @@ int main(void)
   MX_TIM5_Init();
   /* USER CODE BEGIN 2 */
 
-
-  SCI_init();
-  //LIN_init();
-  //LED_demo();
-  PSERV_init();
-  PSERV_enable();
-
-  LCD_BKLT_init();
-  LCD_Init();
-  LCD_uGUI_init();
-  JOY_init(&hadc4, &htim1);
+  	  SCI_init();
 
 
-  InitMotor();
+  	  PSERV_init();
+  	  PSERV_enable();
+
+  	  LCD_BKLT_init();
+  	  LCD_Init();
+  	  LCD_uGUI_init();
+  	  JOY_init(&hadc4, &htim1);
+
+
+  	  InitMotor();
 
 
 
-  MmsToMove(EX_MOTOR, 500, DIR_RIGHT);
+  	  MmsToMove(EX_MOTOR, 5000, DIR_RIGHT);
 
 
-  //JOY_SCI_send_status();
 
+
+
+
+
+  /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
@@ -461,7 +464,7 @@ static void MX_TIM6_Init(void)
   /* USER CODE END TIM6_Init 1 */
   TIM_InitStruct.Prescaler = 143;
   TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
-  TIM_InitStruct.Autoreload = 49;
+  TIM_InitStruct.Autoreload = 999;
   LL_TIM_Init(TIM6, &TIM_InitStruct);
   LL_TIM_DisableARRPreload(TIM6);
   LL_TIM_SetTriggerOutput(TIM6, LL_TIM_TRGO_RESET);
@@ -502,26 +505,16 @@ static void MX_UART5_Init(void)
   LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_UART5);
 
   LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOC);
-  LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOD);
   /**UART5 GPIO Configuration
   PC12   ------> UART5_TX
-  PD2   ------> UART5_RX
   */
   GPIO_InitStruct.Pin = LL_GPIO_PIN_12;
   GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
   GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
-  GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
+  GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_OPENDRAIN;
   GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
   GPIO_InitStruct.Alternate = LL_GPIO_AF_5;
   LL_GPIO_Init(GPIOC, &GPIO_InitStruct);
-
-  GPIO_InitStruct.Pin = LL_GPIO_PIN_2;
-  GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
-  GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
-  GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
-  GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
-  GPIO_InitStruct.Alternate = LL_GPIO_AF_5;
-  LL_GPIO_Init(GPIOD, &GPIO_InitStruct);
 
   /* UART5 interrupt Init */
   NVIC_SetPriority(UART5_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(),0, 0));
@@ -541,7 +534,7 @@ static void MX_UART5_Init(void)
   LL_USART_DisableFIFO(UART5);
   LL_USART_SetTXFIFOThreshold(UART5, LL_USART_FIFOTHRESHOLD_1_8);
   LL_USART_SetRXFIFOThreshold(UART5, LL_USART_FIFOTHRESHOLD_1_8);
-  LL_USART_ConfigLINMode(UART5);
+  LL_USART_ConfigHalfDuplexMode(UART5);
 
   /* USER CODE BEGIN WKUPType UART5 */
 

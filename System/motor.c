@@ -7,6 +7,14 @@
 #include "motor.h"
 
 
+#define TIM5_FREQ_HZ 1000000.0f
+#define CONTROL_HZ 1000.0f
+#define ARR_MIN 50
+#define ARR_MAX 60000
+
+
+
+
 typedef enum { STEP_IDLE, STEP_RUNNING } stepState_t;
 
 typedef struct{
@@ -23,6 +31,11 @@ typedef struct{
 	volatile uint32_t 	steps_target;
 	volatile uint32_t	steps_done;
 	volatile stepState_t state;
+
+	volatile float v;
+	float v_min;
+	float v_target;
+	float accel;
 
 } motorHandle;
 
@@ -51,8 +64,20 @@ void InitMotor(void){
 	//nastavljeno 50% duty cycle
 	__HAL_TIM_SET_COMPARE(&htim5, TIM_CHANNEL_2, (htim5.Init.Period + 1) / 2);
 
+    motors[EX_MOTOR].v_min    = 400.0f;
+    motors[EX_MOTOR].v_target = 4000.0f;
+    motors[EX_MOTOR].accel    = 1000.0f;
+
 }
 
+static void ApplyVelocity(float v){
+	if(v < 1.0f) v = 1.0f;
+	uint32_t arr = (uint32_t)(TIM5_FREQ_HZ / v);
+	if (arr < ARR_MIN) arr = ARR_MIN;
+	if (arr > ARR_MAX) arr = ARR_MAX;
+	__HAL_TIM_SET_AUTORELOAD(&htim5, arr - 1);
+	__HAL_TIM_SET_COMPARE(&htim5, TIM_CHANNEL_2, arr / 2);
+}
 
 void MotorDirectionRight(motorsEnum motor){
 
@@ -88,14 +113,16 @@ void MotorEnable(motorsEnum motor){
 }
 
 
-
-
-
 void StepEngineStart(motorsEnum motor, uint32_t steps){
 
-	motors[motor].steps_target = steps;
-	motors[motor].steps_done = 0;
-	motors[motor].state = STEP_RUNNING;
+	 motorHandle *m = &motors[motor];
+
+	m->steps_target = steps;
+	m->steps_done   = 0;
+	m->v            = m->v_min;
+	m->state        = STEP_RUNNING;
+
+	ApplyVelocity(m->v);
 
 	__HAL_TIM_SET_COUNTER(&htim5, 0);
 	__HAL_TIM_CLEAR_FLAG(&htim5, TIM_FLAG_UPDATE);
@@ -157,7 +184,32 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	}
 }
 
+void StepEngineSetProfile(motorsEnum motor, float v_min, float v_target, float accel){
+	motors[motor].v_min = v_min;
+	motors[motor].v_target = v_target;
+	motors[motor].accel = accel;
+}
 
+void MotionControlTick(void){
+	motorHandle *m = &motors[EX_MOTOR];
+	if(m->state != STEP_RUNNING) return;
+
+	uint32_t done = m->steps_done;
+	uint32_t remaining = (done >= m->steps_target) ? 0 : (m->steps_target -done);
+
+	float dt = 1.0f / CONTROL_HZ;
+	float n_decel = (m->v * m->v) / (2.0f * m->accel);
+
+	if((float)remaining <= n_decel) m->v -= m->accel * dt;
+	else if (m->v < m->v_target)	m->v += m->accel * dt;
+
+	if(m->v < m->v_min) 	m->v = m->v_min;
+	if(m->v > m->v_target) 	m->v = m->v_target;
+
+
+	ApplyVelocity(m->v);
+
+}
 
 
 

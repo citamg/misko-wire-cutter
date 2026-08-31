@@ -4,7 +4,7 @@
 #include "timing_utils.h"
 #include "stm32g4xx_ll_tim.h"
 //#include "kbd.h"
-
+#include "motor.h"
 
 typedef struct{
 	TIM_TypeDef* timer;
@@ -32,4 +32,6 @@ void PSERV_disable(void){
 void PSERV_run_services_Callback(void){
 	//KBD_scan();
 	//KBD_demo_toggle_LEDs_if_buttons_pressed();
+
+	MotionControlTick();
 }
